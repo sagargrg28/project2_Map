@@ -21,11 +21,12 @@ class ViewController: UIViewController, CLLocationManagerDelegate, MKMapViewDele
         super.viewDidLoad()
         // Do any additional setup after loading the view.
         locationManager.delegate = self
-        
-       
         //Requesting current location
         locationManager.requestWhenInUseAuthorization()
         locationManager.requestLocation()
+        
+        
+    
         
         
     }
@@ -40,13 +41,10 @@ class ViewController: UIViewController, CLLocationManagerDelegate, MKMapViewDele
                 print(fullLocation)
             }
             
-            
             setupMap()
 //            addAnnotation(location: location)
-            loadWeather(search: fullLocation)
+            loadWeather(search: fullLocation) //Cal the weather API according to current location
 
-
-            
         }
     }
     
@@ -84,7 +82,7 @@ class ViewController: UIViewController, CLLocationManagerDelegate, MKMapViewDele
                 print (weatherResponse.current.temp_f)
                 
                 DispatchQueue.main.async {
-                    self.addAnnotation(location: CLLocation(latitude: self.latitude, longitude: self.longitude), title: (weatherResponse.current.condition.text), gylphText: "\(weatherResponse.current.temp_c)C ", weatherImage: (self.weatherImage(code: weatherResponse.current.condition.code)))
+                    self.addAnnotation(location: CLLocation(latitude: self.latitude, longitude: self.longitude), title: (weatherResponse.current.condition.text), gylphText: "\(weatherResponse.current.temp_c)C ", weatherImage: (self.weatherImage(code: weatherResponse.current.condition.code)), color: (self.colorTemperature(temp: weatherResponse.current.temp_c)))
 //                    self.location.text = weatherResponse.location.name
 //                    self.condition.text = weatherResponse.current.condition.text
 //                    self.temperature.text = "\(weatherResponse.current.temp_c) C"
@@ -124,16 +122,18 @@ class ViewController: UIViewController, CLLocationManagerDelegate, MKMapViewDele
     }
     
     
-    private func addAnnotation(location: CLLocation, title: String, gylphText: String?, weatherImage: String){
+    private func addAnnotation(location: CLLocation, title: String, gylphText: String?, weatherImage: String, color: String){
         let annotation = Myannotation(cordinate: location.coordinate,
                                       title: title,
                                       subTitle: "My subtitle",
                                       gylphText: gylphText,
-                                      weatherImage: weatherImage)
+                                      weatherImage: weatherImage,
+                                      color: color)
         
         mapView.addAnnotation(annotation)
         
     }
+    //Function for the weather Image according to the weather code
     private func weatherImage(code: Int)-> String{
         
         var image = ""
@@ -149,6 +149,20 @@ class ViewController: UIViewController, CLLocationManagerDelegate, MKMapViewDele
         default : image = "cloud.sun.bolt.fill"
         }
         return image
+    }
+    // Get the color according to the tempereature
+    private func colorTemperature(temp: Double)-> String{
+        var color = ""
+        switch temp {
+            case let x where x > 35: color = "dark red"
+            case 25...30:   color = "orange"
+            case 17..<24:   color = "light blue"
+            case 0...11:     color="dark blue"
+            case let x where x < 0: color = "purple"
+            default:        color = "black"
+            
+            }
+        return color
     }
     
     private func setupMap(){
@@ -196,7 +210,11 @@ class ViewController: UIViewController, CLLocationManagerDelegate, MKMapViewDele
         
         
         //change the color of the marker
-        view.markerTintColor = UIColor.purple
+        if let myAnnotation = annotation as? Myannotation {
+            let mycolor = UIColor(named:myAnnotation.color)
+            view.markerTintColor = mycolor
+        }
+//        view.markerTintColor = UIColor.purple
         
         //change the color of accessories
         view.tintColor = UIColor.red
@@ -220,14 +238,16 @@ class Myannotation:NSObject, MKAnnotation{
     var subtitle: String?
     var gylphText: String?
     var weatherImage: String
+    var color : String
     
     
-    init(cordinate: CLLocationCoordinate2D, title: String, subTitle: String, gylphText: String? = nil, weatherImage: String) {
+    init(cordinate: CLLocationCoordinate2D, title: String, subTitle: String, gylphText: String? = nil, weatherImage: String, color: String) {
         self.coordinate = cordinate
         self.title = title
         self.subtitle = subTitle
         self.gylphText = gylphText
         self.weatherImage = weatherImage
+        self.color = color
         super.init()
     }
     

@@ -40,7 +40,7 @@ class ViewController: UIViewController, CLLocationManagerDelegate, MKMapViewDele
                 print(fullLocation)
             }
             
-            let location = CLLocation(latitude: latitude, longitude: longitude)
+            
             setupMap()
 //            addAnnotation(location: location)
             loadWeather(search: fullLocation)
@@ -84,7 +84,7 @@ class ViewController: UIViewController, CLLocationManagerDelegate, MKMapViewDele
                 print (weatherResponse.current.temp_f)
                 
                 DispatchQueue.main.async {
-                    self.addAnnotation(location: CLLocation(latitude: self.latitude, longitude: self.longitude), title: "\(weatherResponse.current.temp_c)C ")
+                    self.addAnnotation(location: CLLocation(latitude: self.latitude, longitude: self.longitude), title: (weatherResponse.current.condition.text), gylphText: "\(weatherResponse.current.temp_c)C ", weatherImage: (self.weatherImage(code: weatherResponse.current.condition.code)))
 //                    self.location.text = weatherResponse.location.name
 //                    self.condition.text = weatherResponse.current.condition.text
 //                    self.temperature.text = "\(weatherResponse.current.temp_c) C"
@@ -124,11 +124,31 @@ class ViewController: UIViewController, CLLocationManagerDelegate, MKMapViewDele
     }
     
     
-    private func addAnnotation(location: CLLocation, title: String){
-        let annotation = Myannotation(cordinate: location.coordinate, title: title, subTitle: "My subtitle" )
+    private func addAnnotation(location: CLLocation, title: String, gylphText: String?, weatherImage: String){
+        let annotation = Myannotation(cordinate: location.coordinate,
+                                      title: title,
+                                      subTitle: "My subtitle",
+                                      gylphText: gylphText,
+                                      weatherImage: weatherImage)
         
         mapView.addAnnotation(annotation)
         
+    }
+    private func weatherImage(code: Int)-> String{
+        
+        var image = ""
+        switch code{
+        case 1000 :  image = "sun.max"
+        case 1006, 1003 :   image = "cloud.fill"
+        case 1009 : image = "cloud"
+        case 1030, 1135, 1147 : image = "cloud.fog.fill"
+        case 1063, 1180, 1183, 1186, 1189, 1192, 1195, 1198, 1201,1240,1243, 1246, 1249 : image = "cloud.rain.fill"
+         
+        case 1087 : image = "cloud.bolt.rain"
+        case 1114, 1210,1213,1216,1219,1222,1225,1255,1258,1279,1282 : image = "cloud.snow.fill"
+        default : image = "cloud.sun.bolt.fill"
+        }
+        return image
     }
     
     private func setupMap(){
@@ -169,8 +189,11 @@ class ViewController: UIViewController, CLLocationManagerDelegate, MKMapViewDele
         view.rightCalloutAccessoryView = button
         
         //add and image
-        let image = UIImage(systemName: "sun.and.horizon.circle.fill")
-        view.leftCalloutAccessoryView = UIImageView(image: image)
+        if let myAnnotation = annotation as? Myannotation {
+            let image = UIImage(systemName: myAnnotation.weatherImage)
+            view.leftCalloutAccessoryView = UIImageView(image: image)
+        }
+        
         
         //change the color of the marker
         view.markerTintColor = UIColor.purple
@@ -178,12 +201,39 @@ class ViewController: UIViewController, CLLocationManagerDelegate, MKMapViewDele
         //change the color of accessories
         view.tintColor = UIColor.red
         
+        if let myAnnotation = annotation as? Myannotation {
+            view.glyphText = myAnnotation.gylphText
+        }
+        
+        
+        
         return view
         
     }
 
 }
 
+// Creating annotation class
+class Myannotation:NSObject, MKAnnotation{
+    var coordinate: CLLocationCoordinate2D
+    var title: String?
+    var subtitle: String?
+    var gylphText: String?
+    var weatherImage: String
+    
+    
+    init(cordinate: CLLocationCoordinate2D, title: String, subTitle: String, gylphText: String? = nil, weatherImage: String) {
+        self.coordinate = cordinate
+        self.title = title
+        self.subtitle = subTitle
+        self.gylphText = gylphText
+        self.weatherImage = weatherImage
+        super.init()
+    }
+    
+}
+
+//Struct for docoding weather API
 struct weatherRespose: Decodable {
     let location : location
     let current : current
@@ -202,23 +252,6 @@ struct current: Decodable{
 struct weatherCondition: Decodable{
     let text: String
     let code: Int
-}
-
-
-
-class Myannotation:NSObject, MKAnnotation{
-    var coordinate: CLLocationCoordinate2D
-    var title: String?
-    var subtitle: String?
-    
-    
-    init(cordinate: CLLocationCoordinate2D, title: String, subTitle: String) {
-        self.coordinate = cordinate
-        self.title = title
-        self.subtitle = subTitle
-        super.init()
-    }
-    
 }
 
 

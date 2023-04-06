@@ -80,9 +80,10 @@ class ViewController: UIViewController, CLLocationManagerDelegate, MKMapViewDele
                 print(weatherResponse.location.name)
                 print (weatherResponse.current.temp_c)
                 print (weatherResponse.current.temp_f)
+                print (weatherResponse.current.feelslike_c)
                 
                 DispatchQueue.main.async {
-                    self.addAnnotation(location: CLLocation(latitude: self.latitude, longitude: self.longitude), title: (weatherResponse.current.condition.text), gylphText: "\(weatherResponse.current.temp_c)C ", weatherImage: (self.weatherImage(code: weatherResponse.current.condition.code)), color: (self.colorTemperature(temp: weatherResponse.current.temp_c)))
+                    self.addAnnotation(location: CLLocation(latitude: self.latitude, longitude: self.longitude), title: (weatherResponse.current.condition.text), subTitle: "\(weatherResponse.current.feelslike_c)", gylphText: "\(weatherResponse.current.temp_c)C ", weatherImage: (self.weatherImage(code: weatherResponse.current.condition.code)), color: (self.colorTemperature(temp: weatherResponse.current.temp_c)))
 //                    self.location.text = weatherResponse.location.name
 //                    self.condition.text = weatherResponse.current.condition.text
 //                    self.temperature.text = "\(weatherResponse.current.temp_c) C"
@@ -122,10 +123,10 @@ class ViewController: UIViewController, CLLocationManagerDelegate, MKMapViewDele
     }
     
     
-    private func addAnnotation(location: CLLocation, title: String, gylphText: String?, weatherImage: String, color: String){
+    private func addAnnotation(location: CLLocation, title: String, subTitle: String , gylphText: String?, weatherImage: String, color: UIColor){
         let annotation = Myannotation(cordinate: location.coordinate,
                                       title: title,
-                                      subTitle: "My subtitle",
+                                      subTitle: subTitle,
                                       gylphText: gylphText,
                                       weatherImage: weatherImage,
                                       color: color)
@@ -151,18 +152,20 @@ class ViewController: UIViewController, CLLocationManagerDelegate, MKMapViewDele
         return image
     }
     // Get the color according to the tempereature
-    private func colorTemperature(temp: Double)-> String{
-        var color = ""
-        switch temp {
-            case let x where x > 35: color = "dark red"
-            case 25...30:   color = "orange"
-            case 17..<24:   color = "light blue"
-            case 0...11:     color="dark blue"
-            case let x where x < 0: color = "purple"
-            default:        color = "black"
-            
+    private func colorTemperature(temp: Double)-> UIColor{
+        var color: UIColor
+            if temp > 35 {
+                color = UIColor(red: 0.5, green: 0, blue: 0, alpha: 1.0) // dark red
+            } else if temp >= 25 && temp <= 30 {
+                color = UIColor.orange
+            } else if temp >= 17 && temp <= 24 {
+                color = UIColor.red
+            } else if temp >= 12 && temp <= 16 {
+                color = UIColor.blue // default color if value is outside the specified ranges
+            }else{
+                color = UIColor.purple
             }
-        return color
+            return color
     }
     
     private func setupMap(){
@@ -185,46 +188,50 @@ class ViewController: UIViewController, CLLocationManagerDelegate, MKMapViewDele
         mapView.setCameraBoundary(cameraBoundries, animated: true)
 
         //Camera Zoom Range
-        let zoomRange = MKMapView.CameraZoomRange(maxCenterCoordinateDistance: 100000)
+        let zoomRange = MKMapView.CameraZoomRange(maxCenterCoordinateDistance: 500000)
         mapView.setCameraZoomRange(zoomRange, animated: true)
 
     }
     
     func mapView(_ mapView: MKMapView, viewFor annotation: MKAnnotation) -> MKAnnotationView? {
-        let identifier = "whatIsthis "
-        let view = MKMarkerAnnotationView(annotation: annotation, reuseIdentifier: identifier)
-        view.canShowCallout = true
-        
-        //set the position for callout
-        view.calloutOffset = CGPoint(x: 0, y: 10)
-        
-        //add a button to the right hand side
-        let button = UIButton(type: .detailDisclosure)
-        view.rightCalloutAccessoryView = button
-        
-        //add and image
-        if let myAnnotation = annotation as? Myannotation {
-            let image = UIImage(systemName: myAnnotation.weatherImage)
-            view.leftCalloutAccessoryView = UIImageView(image: image)
+        let identifier = "myidentifier "
+        var view:MKMarkerAnnotationView
+        // check to see if we have view to reuse
+        if let dequedView = mapView.dequeueReusableAnnotationView(withIdentifier: identifier) as? MKMarkerAnnotationView{
+            dequedView.annotation = annotation
+            
+            view = dequedView
+        }else{
+            view = MKMarkerAnnotationView(annotation: annotation, reuseIdentifier: identifier)
+            view.canShowCallout = true
+            
+            //set the position for callout
+            view.calloutOffset = CGPoint(x: 0, y: 10)
+            
+            //add a button to the right hand side
+            let button = UIButton(type: .detailDisclosure)
+            view.rightCalloutAccessoryView = button
+            
+            //add and image
+            if let myAnnotation = annotation as? Myannotation {
+                let image = UIImage(systemName: myAnnotation.weatherImage)
+                view.leftCalloutAccessoryView = UIImageView(image: image)
+            }
+            
+            
+            //change the color of the marker
+            if let myAnnotation = annotation as? Myannotation {
+                view.markerTintColor = myAnnotation.color
+            }
+            
+            //change the color of accessories
+            view.tintColor = UIColor.red
+            
+            if let myAnnotation = annotation as? Myannotation {
+                view.glyphText = myAnnotation.gylphText
+            }
         }
-        
-        
-        //change the color of the marker
-        if let myAnnotation = annotation as? Myannotation {
-            let mycolor = UIColor(named:myAnnotation.color)
-            view.markerTintColor = mycolor
-        }
-//        view.markerTintColor = UIColor.purple
-        
-        //change the color of accessories
-        view.tintColor = UIColor.red
-        
-        if let myAnnotation = annotation as? Myannotation {
-            view.glyphText = myAnnotation.gylphText
-        }
-        
-        
-        
+       
         return view
         
     }
@@ -238,10 +245,10 @@ class Myannotation:NSObject, MKAnnotation{
     var subtitle: String?
     var gylphText: String?
     var weatherImage: String
-    var color : String
+    var color : UIColor
     
     
-    init(cordinate: CLLocationCoordinate2D, title: String, subTitle: String, gylphText: String? = nil, weatherImage: String, color: String) {
+    init(cordinate: CLLocationCoordinate2D, title: String, subTitle: String, gylphText: String? = nil, weatherImage: String, color: UIColor) {
         self.coordinate = cordinate
         self.title = title
         self.subtitle = subTitle
@@ -266,6 +273,7 @@ struct location: Decodable{
 struct current: Decodable{
     let temp_c : Double
     let temp_f : Double
+    let feelslike_c: Double
     let condition : weatherCondition
 }
 

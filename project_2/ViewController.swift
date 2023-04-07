@@ -10,13 +10,13 @@ import MapKit
 import CoreLocation
 
 class ViewController: UIViewController, CLLocationManagerDelegate, MKMapViewDelegate {
-
+    
     @IBOutlet weak var mapView: MKMapView!
     private let locationManager = CLLocationManager()
     var fullLocation: String?
     var latitude: Double = 0.0
     var longitude: Double = 0.0
-   // private let locationManagerDelegate = MyLocationManagerDelegate()
+    // private let locationManagerDelegate = MyLocationManagerDelegate()
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view.
@@ -26,15 +26,15 @@ class ViewController: UIViewController, CLLocationManagerDelegate, MKMapViewDele
         locationManager.requestLocation()
         
         
-    
+        
         
         
     }
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         print("Got the current Location")
         if let location = locations.last {
-             latitude = location.coordinate.latitude
-             longitude = location.coordinate.longitude
+            latitude = location.coordinate.latitude
+            longitude = location.coordinate.longitude
             
             fullLocation = "\(String(describing: latitude)),\(String(describing: longitude))"
             if let fullLocation = fullLocation {
@@ -42,9 +42,9 @@ class ViewController: UIViewController, CLLocationManagerDelegate, MKMapViewDele
             }
             
             setupMap()
-//            addAnnotation(location: location)
+            //            addAnnotation(location: location)
             loadWeather(search: fullLocation) //Cal the weather API according to current location
-
+            
         }
     }
     
@@ -75,7 +75,7 @@ class ViewController: UIViewController, CLLocationManagerDelegate, MKMapViewDele
                 print ("Data not received ")
                 return
             }
-             
+            
             if let weatherResponse = self.parseJson(data: data){
                 print(weatherResponse.location.name)
                 print (weatherResponse.current.temp_c)
@@ -83,15 +83,15 @@ class ViewController: UIViewController, CLLocationManagerDelegate, MKMapViewDele
                 print (weatherResponse.current.feelslike_c)
                 
                 DispatchQueue.main.async {
-                    self.addAnnotation(location: CLLocation(latitude: self.latitude, longitude: self.longitude), title: (weatherResponse.current.condition.text), subTitle: "\(weatherResponse.current.feelslike_c)", gylphText: "\(weatherResponse.current.temp_c)C ", weatherImage: (self.weatherImage(code: weatherResponse.current.condition.code)), color: (self.colorTemperature(temp: weatherResponse.current.temp_c)))
-//                    self.location.text = weatherResponse.location.name
-//                    self.condition.text = weatherResponse.current.condition.text
-//                    self.temperature.text = "\(weatherResponse.current.temp_c) C"
-//                    self.celcious = "\(weatherResponse.current.temp_c) C"
-//                    self.ferenhight = "\(weatherResponse.current.temp_f)F"
-//                    self.displayImage(code: weatherResponse.current.condition.code)
-//
-              }
+                    self.addAnnotation(location: CLLocation(latitude: self.latitude, longitude: self.longitude), title: (weatherResponse.current.condition.text), subTitle: "Feels Like \(weatherResponse.current.feelslike_c)", gylphText: "\(weatherResponse.current.temp_c)C ", weatherImage: (self.weatherImage(code: weatherResponse.current.condition.code)), color: (self.colorTemperature(temp: weatherResponse.current.temp_c)))
+                    //                    self.location.text = weatherResponse.location.name
+                    //                    self.condition.text = weatherResponse.current.condition.text
+                    //                    self.temperature.text = "\(weatherResponse.current.temp_c) C"
+                    //                    self.celcious = "\(weatherResponse.current.temp_c) C"
+                    //                    self.ferenhight = "\(weatherResponse.current.temp_f)F"
+                    //                    self.displayImage(code: weatherResponse.current.condition.code)
+                    //
+                }
             }
             
         }
@@ -109,7 +109,7 @@ class ViewController: UIViewController, CLLocationManagerDelegate, MKMapViewDele
             print("Error decoding")
         }
         return weather
-
+        
     }
     // Making URL
     private func getURl(query: String)->URL?{
@@ -144,7 +144,7 @@ class ViewController: UIViewController, CLLocationManagerDelegate, MKMapViewDele
         case 1009 : image = "cloud"
         case 1030, 1135, 1147 : image = "cloud.fog.fill"
         case 1063, 1180, 1183, 1186, 1189, 1192, 1195, 1198, 1201,1240,1243, 1246, 1249 : image = "cloud.rain.fill"
-         
+            
         case 1087 : image = "cloud.bolt.rain"
         case 1114, 1210,1213,1216,1219,1222,1225,1255,1258,1279,1282 : image = "cloud.snow.fill"
         default : image = "cloud.sun.bolt.fill"
@@ -154,43 +154,43 @@ class ViewController: UIViewController, CLLocationManagerDelegate, MKMapViewDele
     // Get the color according to the tempereature
     private func colorTemperature(temp: Double)-> UIColor{
         var color: UIColor
-            if temp > 35 {
-                color = UIColor(red: 0.5, green: 0, blue: 0, alpha: 1.0) // dark red
-            } else if temp >= 25 && temp <= 30 {
-                color = UIColor.orange
-            } else if temp >= 17 && temp <= 24 {
-                color = UIColor.red
-            } else if temp >= 12 && temp <= 16 {
-                color = UIColor.blue // default color if value is outside the specified ranges
-            }else{
-                color = UIColor.purple
-            }
-            return color
+        if temp > 35 {
+            color = UIColor(red: 0.5, green: 0, blue: 0, alpha: 1.0) // dark red
+        } else if temp >= 25 && temp <= 30 {
+            color = UIColor.orange
+        } else if temp >= 17 && temp <= 24 {
+            color = UIColor.red
+        } else if temp >= 12 && temp <= 16 {
+            color = UIColor.blue // default color if value is outside the specified ranges
+        }else{
+            color = UIColor.purple
+        }
+        return color
     }
     
     private func setupMap(){
         //set the delecate
         mapView.delegate = self
         
-
+        
         let location = CLLocation(latitude: latitude, longitude: longitude)
         let radiusInMeter: CLLocationDistance = 1000
-
+        
         let region = MKCoordinateRegion(center: location.coordinate,
                                         latitudinalMeters: radiusInMeter,
                                         longitudinalMeters: radiusInMeter)
-
-
+        
+        
         mapView.setRegion(region, animated: true)
-
+        
         //camera boundries
         let cameraBoundries = MKMapView.CameraBoundary(coordinateRegion: region)
         mapView.setCameraBoundary(cameraBoundries, animated: true)
-
+        
         //Camera Zoom Range
         let zoomRange = MKMapView.CameraZoomRange(maxCenterCoordinateDistance: 500000)
         mapView.setCameraZoomRange(zoomRange, animated: true)
-
+        
     }
     
     func mapView(_ mapView: MKMapView, viewFor annotation: MKAnnotation) -> MKAnnotationView? {
@@ -231,11 +231,24 @@ class ViewController: UIViewController, CLLocationManagerDelegate, MKMapViewDele
                 view.glyphText = myAnnotation.gylphText
             }
         }
-       
+        
         return view
         
     }
-
+    
+    func mapView(_ mapView: MKMapView, annotationView view: MKAnnotationView, calloutAccessoryControlTapped control: UIControl) {
+        performSegue(withIdentifier: "toToDetailscreen", sender: self)
+        print("Button pressed")
+    }
+    
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        if segue.identifier == "toToDetailscreen" {
+            let destination = segue.destination as! detailScreen
+            destination.longitude = longitude
+            destination.latitude = latitude
+        }
+    }
+    
 }
 
 // Creating annotation class

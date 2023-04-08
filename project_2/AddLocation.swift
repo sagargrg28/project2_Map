@@ -23,7 +23,7 @@ class AddLocation: UIViewController {
     }
     
     @IBAction func searchBtnTapped(_ sender: UIButton) {
-        location.text = searchTextField.text
+        loadWeather(search: searchTextField.text)
     }
     
     
@@ -32,6 +32,85 @@ class AddLocation: UIViewController {
     }
     @IBAction func cancelBtnTapped(_ sender: UIBarButtonItem) {
         
+    }
+    private func loadWeather(search: String?){
+        guard let search = search else{
+            return
+        }
+        //Get url
+        guard let url = getURl(query: search) else{
+            print("URL not found ")
+            return
+        }
+        //create url session
+        let urlSession = URLSession.shared
+        //creating task for session
+        let dataTask = urlSession.dataTask(with: url) { data, response, error in
+            
+            guard  error == nil else {
+                print("Error received ")
+                return
+            }
+            
+            guard let data = data else {
+                print ("Data not received ")
+                return
+            }
+             
+            if let weatherResponse = self.parseJson(data: data){
+                print(weatherResponse.location.name)
+                print (weatherResponse.current.temp_c)
+                
+                DispatchQueue.main.async {
+                    self.location.text = weatherResponse.location.name
+                    self.condition.text = weatherResponse.current.condition.text
+                    self.temperature.text = "\(weatherResponse.current.temp_c) C"
+                    self.displayImage(code: weatherResponse.current.condition.code)
+
+                }
+            }
+            
+        }
+        //start the task
+        dataTask.resume()
+        
+    }
+    private func parseJson(data: Data)-> weatherRespose?{
+        let decoder = JSONDecoder()
+        var weather:weatherRespose?
+        do{
+            try weather = decoder.decode(weatherRespose.self, from: data)
+        }catch{
+            print("Error decoding")
+        }
+        return weather
+
+    }
+    
+    private func getURl(query: String)->URL?{
+        let baseUrl = "https://api.weatherapi.com/v1/"
+        let endPoint = "current.json"
+        let apiKey = "03b553e6eb96411a8ef21900231603"
+        guard let url = "\(baseUrl)\(endPoint)?key=\(apiKey)&q=\(query)".addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) else{
+            return nil
+        }
+        return URL(string: url)
+    }
+    
+    private func displayImage(code: Int){
+        let config = UIImage.SymbolConfiguration(paletteColors: [.systemOrange, .systemGray, .systemTeal])
+        weatherImageView.preferredSymbolConfiguration = config
+        switch code{
+        case 1000 :weatherImageView.image = UIImage(systemName: "sun.max")
+        case 1006, 1003 : weatherImageView.image = UIImage(systemName: "cloud.fill")
+        case 1009 : weatherImageView.image = UIImage(systemName: "cloud")
+        case 1030, 1135, 1147 : weatherImageView.image = UIImage(systemName: "cloud.fog.fill")
+        case 1063, 1180, 1183, 1186, 1189, 1192, 1195, 1198, 1201,1240,1243, 1246, 1249 :weatherImageView.image = UIImage(systemName: "cloud.rain.fill")
+        
+        case 1087 :weatherImageView.image = UIImage(systemName: "cloud.bolt.rain")
+        case 1114, 1210,1213,1216,1219,1222,1225,1255,1258,1279,1282 :weatherImageView.image = UIImage(systemName: "cloud.snow.fill")
+        default : weatherImageView.image = UIImage(systemName: "cloud.sun.bolt.fill")
+        }
     }
     /*
     // MARK: - Navigation

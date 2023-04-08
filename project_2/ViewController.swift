@@ -33,8 +33,8 @@ class ViewController: UIViewController, CLLocationManagerDelegate, MKMapViewDele
         
         
     }
-    func addData(_ data: String) {
-        tableItem.append(TableLocation(location: data))
+    func addData(locationName: String, temperature: Float, icon: UIImage?) {
+        tableItem.append(TableLocation(location: locationName,temperature: temperature, icon: icon ))  //need to add temp and icon
         self.tableView.reloadData()
     }
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
@@ -251,7 +251,7 @@ class ViewController: UIViewController, CLLocationManagerDelegate, MKMapViewDele
     }
     //Function to add data to datasource of the table
     private func loadTableItems(){
-        tableItem.append(TableLocation(location: "London"))
+        tableItem.append(TableLocation(location: "London", temperature: 10.5, icon: UIImage(systemName: "sun.max")))
     }
     
 }
@@ -266,6 +266,8 @@ extension ViewController: UITableViewDataSource {
         let item = tableItem[indexPath.row]
         var content = cell.defaultContentConfiguration()
         content.text = item.location
+        content.secondaryText = "\(item.temperature) C"
+        content.image = item.icon
         cell.contentConfiguration = content
         
         return cell
@@ -319,6 +321,8 @@ struct weatherCondition: Decodable{
 // Struct for the table datasource array
 struct TableLocation{
     let location: String
+    let temperature: Float
+    let icon: UIImage?
 }
 
 

@@ -8,7 +8,7 @@
 import UIKit
 
 protocol AddDataDelegate: AnyObject {
-    func addData(_ newData: String)
+    func addData( locationName: String, temperature: Float, icon: UIImage?)
 }
 
 class AddLocation: UIViewController {
@@ -35,15 +35,15 @@ class AddLocation: UIViewController {
     
     
     @IBAction func saveBtnTapped(_ sender: UIBarButtonItem) {
+        
+        dismiss(animated: true, completion: nil)
        
-        if let newData = searchTextField.text {
-                delegate?.addData(newData)
-                dismiss(animated: true, completion: nil)
-            }
     }
     @IBAction func cancelBtnTapped(_ sender: UIBarButtonItem) {
         dismiss(animated: true)
     }
+    
+   
     private func loadWeather(search: String?){
         guard let search = search else{
             return
@@ -77,6 +77,12 @@ class AddLocation: UIViewController {
                     self.condition.text = weatherResponse.current.condition.text
                     self.temperature.text = "\(weatherResponse.current.temp_c) C"
                     self.displayImage(code: weatherResponse.current.condition.code)
+                    
+                    //Call Function to send data to main page
+                    
+                    self.delegate?.addData(locationName: weatherResponse.location.name,
+                                      temperature: Float(weatherResponse.current.temp_c),
+                                      icon: self.getImageName(code: weatherResponse.current.condition.code))
 
                 }
             }
@@ -106,6 +112,19 @@ class AddLocation: UIViewController {
             return nil
         }
         return URL(string: url)
+    }
+    private func getImageName (code: Int)-> UIImage?{
+        switch code {
+        case 1000 : return UIImage(systemName: "sun.max")
+        case 1006, 1003 : return UIImage(systemName: "cloud.fill")
+        case 1009 : return UIImage(systemName: "cloud")
+        case 1030, 1135, 1147 : return UIImage(systemName: "cloud.fog.fill")
+        case 1063, 1180, 1183, 1186, 1189, 1192, 1195, 1198, 1201,1240,1243, 1246, 1249 : return UIImage(systemName: "cloud.rain.fill")
+        
+        case 1087 : return UIImage(systemName: "cloud.bolt.rain")
+        case 1114, 1210,1213,1216,1219,1222,1225,1255,1258,1279,1282 : return UIImage(systemName: "cloud.snow.fill")
+        default : return UIImage(systemName: "cloud.sun.bolt.fill")
+        }
     }
     
     private func displayImage(code: Int){

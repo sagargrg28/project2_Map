@@ -7,11 +7,13 @@
 
 import UIKit
 import CoreLocation
+import Foundation
 
 class detailScreen: UIViewController {
     var longitude: Double?
     var latitude: Double?
     var fullLocation: String?
+    var dateDay : String?
     private var items: [tableItem] = []
     @IBOutlet weak var tableView: UITableView!
     @IBOutlet weak var lowTemp: UILabel!
@@ -19,14 +21,10 @@ class detailScreen: UIViewController {
     @IBOutlet weak var weather: UILabel!
     @IBOutlet weak var temp_C: UILabel!
     @IBOutlet weak var location: UILabel!
-    
-  
-    
+   
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        print(longitude!)
-        print(latitude!)
         
         if let latitude = latitude, let longitude = longitude{
             fullLocation = "\(latitude),\(longitude)"
@@ -140,10 +138,27 @@ class detailScreen: UIViewController {
                   
                    
                 }
+               
                 
                 DispatchQueue.main.async {
+                    
                     for forecastDay in WeatherData.forecast.forecastday{
-                        self.items.append(tableItem(day: forecastDay.date, temperature: forecastDay.day.avgtemp_c, icon: UIImage(systemName: "\(self.weatherImage(code: forecastDay.day.condition.code))")))
+                       
+                        let temperature = forecastDay.day.avgtemp_c
+                        let image = self.weatherImage(code: forecastDay.day.condition.code)
+                        let dateString = forecastDay.date
+                        
+                        //converting date string to day
+                        let dateFormatter = DateFormatter()
+                        dateFormatter.dateFormat = "yyyy-MM-dd"
+                        if let date = dateFormatter.date(from: dateString) {
+                            let dayOfWeekFormatter = DateFormatter()
+                            dayOfWeekFormatter.dateFormat = "EEEE"
+                            self.dateDay = dayOfWeekFormatter.string(from: date)
+                           
+                        }
+                        //adding data to the datasource of table
+                        self.items.append(tableItem(day: self.dateDay!, temperature: temperature, icon: UIImage(systemName: "\(image)")))
                         self.tableView.reloadData()
 
                     }
@@ -154,9 +169,6 @@ class detailScreen: UIViewController {
         }
         //start the task
         dataTask.resume()
-        
-       
-
     }
     
     //Function to load the icon string according to the weather code
@@ -177,9 +189,6 @@ class detailScreen: UIViewController {
         return image
     }
     
-    
-    
-    
 }
 
 extension detailScreen: UITableViewDataSource{
@@ -191,8 +200,8 @@ extension detailScreen: UITableViewDataSource{
         let cell = tableView.dequeueReusableCell(withIdentifier: "toDoCell", for: indexPath)
         let item = items[indexPath.row]
         var content = cell.defaultContentConfiguration()
-        content.text = item.day
-        content.secondaryText = "\(item.temperature)"
+        content.text = "\(item.day)               \(item.temperature)C"
+//        content.secondaryText = "\(item.temperature)"
         content.image = item.icon
         cell.contentConfiguration = content
         return cell

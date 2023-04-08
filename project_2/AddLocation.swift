@@ -7,6 +7,10 @@
 
 import UIKit
 
+protocol AddDataDelegate: AnyObject {
+    func addData(_ newData: String)
+}
+
 class AddLocation: UIViewController {
 
     @IBOutlet weak var condition: UILabel!
@@ -14,6 +18,8 @@ class AddLocation: UIViewController {
     @IBOutlet weak var temperature: UILabel!
     @IBOutlet weak var location: UILabel!
     @IBOutlet weak var weatherImageView: UIImageView!
+    weak var delegate: AddDataDelegate?
+    
     override func viewDidLoad() {
         super.viewDidLoad()
 
@@ -24,14 +30,19 @@ class AddLocation: UIViewController {
     
     @IBAction func searchBtnTapped(_ sender: UIButton) {
         loadWeather(search: searchTextField.text)
+        
     }
     
     
     @IBAction func saveBtnTapped(_ sender: UIBarButtonItem) {
-        
+       
+        if let newData = searchTextField.text {
+                delegate?.addData(newData)
+                dismiss(animated: true, completion: nil)
+            }
     }
     @IBAction func cancelBtnTapped(_ sender: UIBarButtonItem) {
-        
+        dismiss(animated: true)
     }
     private func loadWeather(search: String?){
         guard let search = search else{
@@ -123,3 +134,5 @@ class AddLocation: UIViewController {
     */
 
 }
+
+

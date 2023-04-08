@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		376B35D029E0FF4F00D62C22 /* AddLocation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 376B35CF29E0FF4F00D62C22 /* AddLocation.swift */; };
 		37E88DE229DE18F80082ABF7 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37E88DE129DE18F80082ABF7 /* AppDelegate.swift */; };
 		37E88DE429DE18F80082ABF7 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37E88DE329DE18F80082ABF7 /* SceneDelegate.swift */; };
 		37E88DE629DE18F80082ABF7 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37E88DE529DE18F80082ABF7 /* ViewController.swift */; };
@@ -17,6 +18,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		376B35CF29E0FF4F00D62C22 /* AddLocation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddLocation.swift; sourceTree = "<group>"; };
 		37E88DDE29DE18F80082ABF7 /* project_2.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = project_2.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		37E88DE129DE18F80082ABF7 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		37E88DE329DE18F80082ABF7 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -66,6 +68,7 @@
 				37E88DEC29DE18FA0082ABF7 /* LaunchScreen.storyboard */,
 				37E88DEF29DE18FA0082ABF7 /* Info.plist */,
 				37E88E1529DF96480082ABF7 /* detailScreen.swift */,
+				376B35CF29E0FF4F00D62C22 /* AddLocation.swift */,
 			);
 			path = project_2;
 			sourceTree = "<group>";
@@ -141,6 +144,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				376B35D029E0FF4F00D62C22 /* AddLocation.swift in Sources */,
 				37E88E1629DF96480082ABF7 /* detailScreen.swift in Sources */,
 				37E88DE629DE18F80082ABF7 /* ViewController.swift in Sources */,
 				37E88DE229DE18F80082ABF7 /* AppDelegate.swift in Sources */,

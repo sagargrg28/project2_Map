@@ -24,11 +24,7 @@ class ViewController: UIViewController, CLLocationManagerDelegate, MKMapViewDele
         //Requesting current location
         locationManager.requestWhenInUseAuthorization()
         locationManager.requestLocation()
-        
-        
-        
-        
-        
+ 
     }
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         print("Got the current Location")
@@ -42,7 +38,6 @@ class ViewController: UIViewController, CLLocationManagerDelegate, MKMapViewDele
             }
             
             setupMap()
-            //            addAnnotation(location: location)
             loadWeather(search: fullLocation) //Cal the weather API according to current location
             
         }
@@ -84,13 +79,7 @@ class ViewController: UIViewController, CLLocationManagerDelegate, MKMapViewDele
                 
                 DispatchQueue.main.async {
                     self.addAnnotation(location: CLLocation(latitude: self.latitude, longitude: self.longitude), title: (weatherResponse.current.condition.text), subTitle: "Feels Like \(weatherResponse.current.feelslike_c)", gylphText: "\(weatherResponse.current.temp_c)C ", weatherImage: (self.weatherImage(code: weatherResponse.current.condition.code)), color: (self.colorTemperature(temp: weatherResponse.current.temp_c)))
-                    //                    self.location.text = weatherResponse.location.name
-                    //                    self.condition.text = weatherResponse.current.condition.text
-                    //                    self.temperature.text = "\(weatherResponse.current.temp_c) C"
-                    //                    self.celcious = "\(weatherResponse.current.temp_c) C"
-                    //                    self.ferenhight = "\(weatherResponse.current.temp_f)F"
-                    //                    self.displayImage(code: weatherResponse.current.condition.code)
-                    //
+                  
                 }
             }
             
@@ -218,7 +207,6 @@ class ViewController: UIViewController, CLLocationManagerDelegate, MKMapViewDele
                 view.leftCalloutAccessoryView = UIImageView(image: image)
             }
             
-            
             //change the color of the marker
             if let myAnnotation = annotation as? Myannotation {
                 view.markerTintColor = myAnnotation.color
@@ -235,10 +223,14 @@ class ViewController: UIViewController, CLLocationManagerDelegate, MKMapViewDele
         return view
         
     }
-    
+  
     func mapView(_ mapView: MKMapView, annotationView view: MKAnnotationView, calloutAccessoryControlTapped control: UIControl) {
         performSegue(withIdentifier: "toToDetailscreen", sender: self)
         print("Button pressed")
+    }
+    //function to go to add location screen
+    @IBAction func addLocationTapped(_ sender: UIBarButtonItem) {
+        performSegue(withIdentifier: "gotoLastPage", sender: self)
     }
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
@@ -247,6 +239,7 @@ class ViewController: UIViewController, CLLocationManagerDelegate, MKMapViewDele
             destination.longitude = longitude
             destination.latitude = latitude
         }
+      
     }
     
 }
@@ -259,8 +252,7 @@ class Myannotation:NSObject, MKAnnotation{
     var gylphText: String?
     var weatherImage: String
     var color : UIColor
-    
-    
+
     init(cordinate: CLLocationCoordinate2D, title: String, subTitle: String, gylphText: String? = nil, weatherImage: String, color: UIColor) {
         self.coordinate = cordinate
         self.title = title

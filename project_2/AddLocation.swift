@@ -8,7 +8,7 @@
 import UIKit
 
 protocol AddDataDelegate: AnyObject {
-    func addData( locationName: String, temperature: Float, icon: UIImage?)
+    func addData( locationName: String, temperature: Float,lat: Double ,lon:Double, icon: UIImage?)
 }
 
 class AddLocation: UIViewController {
@@ -82,6 +82,8 @@ class AddLocation: UIViewController {
                     
                     self.delegate?.addData(locationName: weatherResponse.location.name,
                                       temperature: Float(weatherResponse.current.temp_c),
+                                           lat: Double(weatherResponse.location.lat),
+                                           lon: Double(weatherResponse.location.lon),
                                       icon: self.getImageName(code: weatherResponse.current.condition.code))
 
                 }

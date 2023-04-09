@@ -30,11 +30,12 @@ class ViewController: UIViewController, CLLocationManagerDelegate, MKMapViewDele
         locationManager.requestLocation()
         loadTableItems()
         tableView.dataSource = self
-        
+        tableView.delegate = self
+        mapView.delegate = self
         
     }
-    func addData(locationName: String, temperature: Float, icon: UIImage?) {
-        tableItem.append(TableLocation(location: locationName,temperature: temperature, icon: icon ))  //need to add temp and icon
+    func addData(locationName: String, temperature: Float, lat: Double,lon:Double, icon: UIImage?) {
+        tableItem.append(TableLocation(location: locationName,temperature: temperature,lat: lat, lon: lon, icon: icon ))  //need to add temp and icon
         self.tableView.reloadData()
     }
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
@@ -83,7 +84,11 @@ class ViewController: UIViewController, CLLocationManagerDelegate, MKMapViewDele
             
             if let weatherResponse = self.parseJson(data: data){
                 DispatchQueue.main.async {
-                    self.addAnnotation(location: CLLocation(latitude: self.latitude, longitude: self.longitude), title: (weatherResponse.current.condition.text), subTitle: "Feels Like \(weatherResponse.current.feelslike_c)", gylphText: "\(weatherResponse.current.temp_c)C ", weatherImage: (self.weatherImage(code: weatherResponse.current.condition.code)), color: (self.colorTemperature(temp: weatherResponse.current.temp_c)))
+                    self.addAnnotation(location: CLLocation(latitude: self.latitude,
+                                                            longitude: self.longitude),
+                                       title: (weatherResponse.current.condition.text),
+                                       subTitle: "Feels Like \(weatherResponse.current.feelslike_c)", gylphText: "\(weatherResponse.current.temp_c)C ", weatherImage: (self.weatherImage(code: weatherResponse.current.condition.code)),
+                                       color: (self.colorTemperature(temp: weatherResponse.current.temp_c)))
                     
                 }
             }
@@ -182,7 +187,7 @@ class ViewController: UIViewController, CLLocationManagerDelegate, MKMapViewDele
         mapView.setCameraBoundary(cameraBoundries, animated: true)
         
         //Camera Zoom Range
-        let zoomRange = MKMapView.CameraZoomRange(maxCenterCoordinateDistance: 100000)
+        let zoomRange = MKMapView.CameraZoomRange(maxCenterCoordinateDistance: 9000000)
         mapView.setCameraZoomRange(zoomRange, animated: true)
         
     }
@@ -231,7 +236,7 @@ class ViewController: UIViewController, CLLocationManagerDelegate, MKMapViewDele
     
     func mapView(_ mapView: MKMapView, annotationView view: MKAnnotationView, calloutAccessoryControlTapped control: UIControl) {
         performSegue(withIdentifier: "toToDetailscreen", sender: self)
-        print("Button pressed")
+       
     }
     //function to go to add location screen
     @IBAction func addLocationTapped(_ sender: UIBarButtonItem) {
@@ -239,19 +244,22 @@ class ViewController: UIViewController, CLLocationManagerDelegate, MKMapViewDele
     }
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        //Sending location to the detail page through segue
         if segue.identifier == "toToDetailscreen" {
             let destination = segue.destination as! detailScreen
             destination.longitude = longitude
             destination.latitude = latitude
         }
+        //using delegate to add data from addlocation to array datasourse of the table
         if let destination = segue.destination as? AddLocation {
             destination.delegate = self
         }
-   
+        
     }
     //Function to add data to datasource of the table
     private func loadTableItems(){
-        tableItem.append(TableLocation(location: "London", temperature: 10.5, icon: UIImage(systemName: "sun.max")))
+        //Adding a default value to array
+        tableItem.append(TableLocation(location: "London", temperature: 10.5, lat: 11.22, lon: 123.22, icon: UIImage(systemName: "sun.max")))
     }
     
 }
@@ -273,6 +281,21 @@ extension ViewController: UITableViewDataSource {
         return cell
     }
     
+    
+}
+
+extension ViewController: UITableViewDelegate {
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        print ("Row selected")
+        let location = tableItem[indexPath.row]
+        
+         let coordinate = CLLocation(latitude: location.lat, longitude: location.lon)
+        let annotation = Myannotation(cordinate: coordinate.coordinate, title: "\(location.location)", subTitle: "\(location.temperature) C",gylphText: "\(location.temperature)" , weatherImage: "cloud.fill" , color: UIColor.blue)
+        mapView.addAnnotation(annotation)
+        
+        
+        
+    }
     
 }
 
@@ -305,6 +328,8 @@ struct weatherRespose: Decodable {
 
 struct location: Decodable{
     let name: String
+    let lat: Float
+    let lon: Float
 }
 
 struct current: Decodable{
@@ -322,6 +347,8 @@ struct weatherCondition: Decodable{
 struct TableLocation{
     let location: String
     let temperature: Float
+    let lat: Double
+    let lon: Double
     let icon: UIImage?
 }
 

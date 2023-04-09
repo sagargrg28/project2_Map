@@ -25,7 +25,7 @@ class detailScreen: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        
+        //Getting latitude and Longitude from main screen through segue
         if let latitude = latitude, let longitude = longitude{
             fullLocation = "\(latitude),\(longitude)"
             loadWeather(search: fullLocation, days: 1)
@@ -108,7 +108,7 @@ class detailScreen: UIViewController {
         }
         return URL(string: url)
     }
-    
+    // Loading table items function which calls API
     private func loadTableItems(){
         
         //Get url
@@ -133,13 +133,7 @@ class detailScreen: UIViewController {
             
             if let WeatherData = self.parseJson(data: data){
          
-                for forecastDay in WeatherData.forecast.forecastday {
-                    print (forecastDay.day.maxtemp_c)
-                  
-                   
-                }
-               
-                
+    
                 DispatchQueue.main.async {
                     
                     for forecastDay in WeatherData.forecast.forecastday{

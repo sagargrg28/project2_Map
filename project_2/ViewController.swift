@@ -35,7 +35,7 @@ class ViewController: UIViewController, CLLocationManagerDelegate, MKMapViewDele
         
     }
     func addData(locationName: String, temperature: Float, lat: Double,lon:Double, icon: UIImage?) {
-        tableItem.append(TableLocation(location: locationName,temperature: temperature,lat: lat, lon: lon, icon: icon ))  //need to add temp and icon
+        tableItem.append(TableLocation(location: locationName,temperature: temperature,lat: lat, lon: lon, icon: icon ))  
         self.tableView.reloadData()
     }
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
@@ -83,7 +83,9 @@ class ViewController: UIViewController, CLLocationManagerDelegate, MKMapViewDele
             }
             
             if let weatherResponse = self.parseJson(data: data){
+                print(weatherResponse.location.name)
                 DispatchQueue.main.async {
+                    // Creating a annotation of the current location
                     self.addAnnotation(location: CLLocation(latitude: self.latitude,
                                                             longitude: self.longitude),
                                        title: (weatherResponse.current.condition.text),
@@ -114,7 +116,7 @@ class ViewController: UIViewController, CLLocationManagerDelegate, MKMapViewDele
     private func getURl(query: String)->URL?{
         let baseUrl = "https://api.weatherapi.com/v1/"
         let endPoint = "current.json"
-        let apiKey = "03b553e6eb96411a8ef21900231603"
+        let apiKey = "60acdd71266c48b2a8a193311230704"
         guard let url = "\(baseUrl)\(endPoint)?key=\(apiKey)&q=\(query)".addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) else{
             return nil
         }
@@ -187,7 +189,7 @@ class ViewController: UIViewController, CLLocationManagerDelegate, MKMapViewDele
         mapView.setCameraBoundary(cameraBoundries, animated: true)
         
         //Camera Zoom Range
-        let zoomRange = MKMapView.CameraZoomRange(maxCenterCoordinateDistance: 9000000)
+        let zoomRange = MKMapView.CameraZoomRange(maxCenterCoordinateDistance: 6000000)
         mapView.setCameraZoomRange(zoomRange, animated: true)
         
     }
@@ -258,8 +260,8 @@ class ViewController: UIViewController, CLLocationManagerDelegate, MKMapViewDele
     }
     //Function to add data to datasource of the table
     private func loadTableItems(){
-        //Adding a default value to array
-        tableItem.append(TableLocation(location: "London", temperature: 10.5, lat: 11.22, lon: 123.22, icon: UIImage(systemName: "sun.max")))
+        //Adding a dummy value to array
+        tableItem.append(TableLocation(location: "Dummy Location", temperature: 10.5, lat: 11.22, lon: 123.22, icon: UIImage(systemName: "sun.max")))
     }
     
 }
@@ -289,7 +291,8 @@ extension ViewController: UITableViewDelegate {
         print ("Row selected")
         let location = tableItem[indexPath.row]
         
-         let coordinate = CLLocation(latitude: location.lat, longitude: location.lon)
+        let coordinate = CLLocation(latitude: location.lat, longitude: location.lon)
+        //creating a annotation when pressed on the list
         let annotation = Myannotation(cordinate: coordinate.coordinate, title: "\(location.location)", subTitle: "\(location.temperature) C",gylphText: "\(location.temperature)" , weatherImage: "cloud.fill" , color: UIColor.blue)
         mapView.addAnnotation(annotation)
         

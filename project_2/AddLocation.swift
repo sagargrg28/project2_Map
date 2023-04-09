@@ -109,7 +109,7 @@ class AddLocation: UIViewController {
     private func getURl(query: String)->URL?{
         let baseUrl = "https://api.weatherapi.com/v1/"
         let endPoint = "current.json"
-        let apiKey = "03b553e6eb96411a8ef21900231603"
+        let apiKey = "60acdd71266c48b2a8a193311230704"
         guard let url = "\(baseUrl)\(endPoint)?key=\(apiKey)&q=\(query)".addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) else{
             return nil
         }
